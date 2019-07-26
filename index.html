@@ -1,0 +1,166 @@
+
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Network Flow Applications</title>
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <script src="main.js"></script>
+  </head>
+  <body>
+    <div id="Introduction">
+      <h1 style="text-align: center;">Network Flow Applications</h1>
+      <p style="text-align:center;">Shunqi Mao's Project for Summer Studies</p>
+    </div>
+    <div id="Definition">
+      <h2>1. What is a flow network?</h2>
+      <p>Just as we can model a road map as a directed graph in order to ﬁnd the shortest path from one point to another, we can also
+         interpret a <strong>directed graph</strong> as a "flow network" and use it to answer questions about material flows. Imagine a material travelling
+         through a system from a source, where the material is produced, to a sink, where it is consumed.</p>
+      <p>A network is basically a directed graph, with a source vertex that provides material and a target vertex that receives material.
+         The weight of each edge represents the capacity of each possible flow, which means the maximum flow on an edge cannot excede the
+         edge's capacity.</p>
+      <img src="network_flow.jpg" alt=""><br>
+      <p>Our goal is to make the target vertex receive <strong>as many materials as we can</strong> through manipulating the flow value of each edge. Note
+         that there is no limit on how many materials the source can provide. It is only about how many resources we can deliver to the
+         target via the network. The following graph shows an example flow in the previous network, the number to the left of the '/' is
+         the flow and the number to the right is the capacity.</p>
+      <img src="network_flow2.jpg" alt="">
+    </div>
+    <div id="Algorithms">
+      <h2>2. How to find the maximum flow?</h2>
+      <p>For the previous example, we happen to obtain the maximum flow of the network. But it is obvious that we will not always be lucky.
+         We need a methodical way to procedurally acheive maximum flow, and a perfect method for this is called <strong>the Ford-Fulkerson Method</strong>.</p>
+      <p>In order to proceed, you need to understand three important concepts: Residual Network, Augmenting Path, Graph Cuts.</p>
+      <ul>
+        <li>Residual Network</li>
+        <p>Intuitively, given a flow network G and a flow f, the residual network G' consists of edges with capacities that represent how
+           we can change the flow on edges of G. An edge of the flow network can admit an amount of additional flow equal to the edge's capacity
+           minus the flow on that edge. If that value is positive, we place that edge into G' with a "<strong>residual capacity</strong>" of c'(u, v) = c(u, v)-f(u, v).
+           The only edges of G that are in G' are those that can admit more flow; those edges (u, v) whose flow equals their capacity have c'(u, v) = 0,
+           and they are not in G'.</p>
+        <img src="residual_network.jpg" alt="">
+        <p>The blue edges in the residual network represents the actual flow they carry in network G. Note that the direction of these edges has been
+           reversed in the residual network. We need these blue edges because we might have to decrease flow in order to obtain global maximum.</p>
+        <li>Augmenting Path</li>
+        <p>An augmenting path is essentially a <strong>simple path</strong> from source to target in the residual network. By the definition of the residual network,
+           we may increase the flow on an edge (u, v) of an augmenting path by up to c'(u,v) without violating the capacity constraint on whichever of
+           (u, v) and (v, u) is in the original flow network G.</p>
+        <img src="augmenting_path.jpg" alt="">
+        <p>For example, there exists an augmenting path: S --> V2 --> V3 --> T, in the residual network above that could increase the overall flow by 4
+           because the maximum residual capacity along the path is 4 (edge V2-->V3).</p>
+        <li>Cuts of Flow Networks</li>
+        <p>A cut in a flow network partitions vertices into two groups(source group and target group) where <strong>Source and Target vertices are separated</strong>. All edges in the network are either
+           intact or cut once (from S to T or from T to S)</p>
+        <img src="graph_cut.jpg" alt="">
+        <p>Every cut has its own flow and capacity: </p>
+           <ul>
+             <li>Flow(Cut) = Sum of flows from Source group to Target group - Sum of flows from Target group to Source group</li>
+             <li>Capacity(Cut) = Sum of capacities from Source group to Target group</li>
+           </ul>
+        <p>From these two equations, we can easily see that <strong>Flow(Cut) <= Capacity(Cut)</strong> always holds
+           because the flow value of each edge is always less than or equal to the edge's capacity.
+        <p>Another important fact is that once all flow values are determined in a network, <strong>the flow values for all cuts are identical</strong>. </p>
+        <p>In the example above, the flow for this particular cut = 12(V1-->V3) + 7(V4-->V3) + 4(V4-->T) - 0(V3-->V2) = 23,
+           the capacity = 12(V1-->V3) + 7(V4-->V3) + 4(V4-->T) = 23.</p>
+        <img src="graph_cut2.jpg" alt="">
+        <p>If we examine another cut of the same network, we can see that the flow for this cut = 11(S-->V1) + 12(S-->V2) = 23, which is also equal to the previous cut's
+           flow value.</p>
+        <p>In a flow network, a minimum cut is a cut whose capacity is minimum over all cuts of the network. The cut shown above is a minimum cut of the network.</p>
+        <p>Now we have Flow(Any Cut) <= Capacity(Any Cut) and Flow(Cut) = Flow(Any Other Cut), we can conclude that <strong>maximum flow <= minimum cut</strong>.</p>
+      </ul>
+      <h3>The Ford-Fulkerson Method</h3>
+      <p>Once you're familiar with the previous three concepts, the Ford-Fulkerson Method will become very easy to understand. It contains three main steps:</p>
+      <ol>
+        <li>Find a simple augmenting path from source to target in the residual graph</li>
+        <li>Locate the edge with the smallest residual capacity and record the value</li>
+        <li>Update flow value for all edges along the path according to the recorded value</li>
+      </ol>
+      <p>The first step requires finding a simple path in a graph, for which we can use several approaches: breadth first search, depth first search, arbitrary pick,
+         or any other search that can yield a simple path. There will be time complexity differences among these search techniques but it is out of our scope here.</p>
+      <p>The second step is very straightforward: walk through the path and report the minimum residual capacity, which takes O(|V|) time.</p>
+      <p>The third step involves an update for the flow values along the path. The update rule is that if the edge(with direction) is in the orginal network, increase
+         its flow by the recorded value, and vice versa.</p>
+      <img src="Ford-Fulkerson1.PNG" alt="">
+      <img src="Ford-Fulkerson2.PNG" alt="">
+      <img src="Ford-Fulkerson3.PNG" alt="">
+      <p>The steps shown above only represents one specific order in which we update the flow values. As we've discussed previously, there are several ways to find
+         simple paths in a connected graph, and the most common approach we use is breadth-first search. The algorithm that uses breadth-first search to find augmenting
+         paths is called <strong>the Edmonds-Karp algorithm</strong>. Detailed implementation of the algorithm and time complexity analysis can be found here:
+         <a href="https://cp-algorithms.com/graph/edmonds_karp.html">The Edmonds-Karp Algorithm</a></p>
+    </div>
+    <div id="Applications">
+      <h2>3. What can we use flow network for?</h2>
+      <h3>Bipartite Matching Problem</h3>
+      <p>The most common application of flow network is to find the <strong>maximum matching</strong> of a bipartite graph.</p>
+      <p>A graph G(V, E) is <strong>bipartite</strong> if V can be partitioned into two sets A and B, where A ∪ B = V and for all edges e = (a, b) ∈ E, a ∈ A, b ∈ B.</p>
+      <p>A <strong>matching</strong> in a graph is a set of edges M ⊆ E such that for every pair of edges e1, e2 ∈ M, e1 and e2 do not share a common end point.</p>
+      <p>A matching is <strong>maximal</strong> if it cannot be extended to a larger matching, and <strong>maximum</strong> if it has the most edges out of any matching M' of G.</p>
+      <p>After understanding the basic concepts, we can now introduce the <strong>bipartite matching problem</strong>:</p>
+      <ul>
+        <li>Input: two mutually exclusive sets of equal size U and V, along with a list of ordered pairs of the form (u, v) where u ∈ U and v ∈ V,
+            indicating pairs of members, one of each set that can be "paired" together. </li>
+        <li>Output: True, if there exists a way to pair up each item in U with an item in V such that each item in both sets appears in exactly one pairing, and false otherwise.</li>
+      </ul>
+      <h4>How do we turn this problem into a flow network?</h4>
+      <p> Create one vertex for each item in each set and add source and sink vertices. Add an edge from the source to each item in set U with capacity 1.
+          Add an edge from each item in set V to the sink with capacity 1. Add an edge between each item in set U and set V that are in the set of ordered pairs with capacity 1.</p>
+      <img src="Bipartite-matching1.PNG" alt="">
+      <p>Since the capacities of all edges are 1, finding the maximum flow means including as many edges as we can into the matching. If you also want to know specific edges that
+         are included in the matching, keep track of each edge added during each iteration of the Ford-Fulkerson method.</p>
+      <p><strong>Note: If the sizes of two sets are not equal, we can still use maximum flow algorithms to solve matching problems.</strong></p>
+      <h4>How can we apply bipartite matching in real life scenarios?</h4>
+      <p>Suppose N teams attend a dinner. Team i has Ti members. There are M tables at the dinner, with M ≥ N. Table i can has Si chairs. We wish to seat all teams such that no two team
+         members are at the same table, so that we maximum students getting to meet members of other teams.</p>
+      <p><strong>Solution: </strong>Now we need to create a flow network whose capacities are not all 1 because there are different constraints on input and output.  Create one vertex for each team and one for each table.
+         Create extra source and sink vertices. <strong>Create edges from the source to each team with a capacity of Ti. Create edges from each table vertex to the sink vertex with capacity Si</strong>.
+         Finally, add edges from each team to each table, with capacity 1, since each team can provide at most one person per table. Run the network flow algorithm.
+         If the maximal flow equals the sum of the number of team members, the seating can be done. Otherwise, it can not be.</p>
+      <h3>Image Segmentation</h3>
+      <p>Bipartite matching is a very direct use of flow network as the process of constructing a network is fairly simple. Another more practical use of flow network is called
+         <strong>Image Segmentation</strong>.</p>
+      <ol>
+        <li><h4>What is image segmentation?</h4></li>
+        <p>Image segmentation can be defined as the task of distinguishing objects from background in unseen images, which requires partitioning an image into a foreground and a background.
+           It is a very important task in computer vision field.</p>
+        <li><h4>How to connect image segmentation to flow network?</h4></li>
+        <p>Basically each pixel in the image is viewed as a node in a graph, edges are formed between nodes with weights corresponding to how alike two pixels are, given some measure of
+           similarity, as well as the distance between them.</p>
+        <img src="Image-segmentation1.PNG" alt="">
+        <p>There are a few things we need to do before applying any of the maximum-flow algorithms mentioned earlier:</p>
+        <ul>
+          <li>Create a source vertex s to represent the foreground.</li>
+          <li>Create a target vertex t to represent the background.</li>
+          <li>Connect s and t to every pixel(vertex) and assign capacity Ai to edge (s, i) and capacity Bi to edge (i, t).<br><strong>Note: Capacities assigned in this step requires certain
+              prior knowledge about the problem(directly given or from previous segmentation results). They are not arbitrary!</strong></li>
+          <li>Direct edges away from s and into t.</li>
+          <li>Let E represent all the edges that are not incident to s and t. Replace each undirected edge in E with two directed edges of capacity 1.</li>
+        </ul>
+        <p>Now, the maximum-flow(minimum-cut) of this graph will be the segmentation of the original graph. This segmentation should be a partition such that similar pixels close to each other
+           will belong to the same partition.</p>
+        <img src="Image-segmentation2.PNG" alt="">
+        <p>In this case, we are only dealing with the most fundamental image segmentation where the image is a simple pixel grid. When training models for machine-learning related image
+           segmentation tasks, the capacities of all edges should be determined by tuning parameters weighing the importance of different features in the image. Detailed calculation of edge
+           weights can be found here: <a href="http://aeriksson.net/papers/eriksson-barr-etal-ssba-06.pdf">Image Seen as a Graph</a></p>
+        <img src="Image-segmentation3.PNG" alt="">
+        <p>Complicated colored images shown above needs prior knowledge (importance of each feature) to adjust edge weights when applying the graph cut method. Different types of object/background
+           combination requires different image descriptors and pixel models in order to acquire higher accuracy. It is essentially a combination of machine learning and max-flow min-cut algorithm
+           to achieve maximum efficiency as well as high precision.</p>
+      </ol>
+      <h3>Network Connectivity</h3>
+      <p>Often one is interested in how connected a graph is, that is how easy is it to get from one vertex to another and how resilient a graph is to losing edges or vertices.
+         This notion of connectivity is particularly useful in computer networks where one doesn't want a network or even the entire internet to fall apart when a handful of computers
+         or wires are removed for maintenance or by viruses. The ultimate goal is to show that <strong>the largest number of distinct (i.e. using different edges)
+         routes between two vertices in a graph is equal to the minimal number of edges that can be cut to separate those vertices</strong>.</p>
+      <h4>Menger's Theorem</h4>
+      <p>Since we're already familiar with graph cuts and flow network, Menger's Theorem should sound fairly straightforward:</p>
+      <p>For any two distinct vertices s and t of an undirected graph, the minimal number of edges we can cut to separate s from t is equal to the maximal number of paths from s
+         to t which do not share any edges (edge-disjoint).</p>
+      <p><strong>Proof: </strong>To apply the max-flow min-cut theorem we replace each edge in G by two directed edges going in opposite directions and assign each edge capacity 1.
+         Since we have restricted the capacity to be 1, the capacity of a cut is equal to the number of edges, k, in the cut. For a flow to have maximal value it must be that each of
+         the edges in the cut is assigned value 1, which means that <strong>this flow is going through all k edges in the cut</strong>. If there were <strong>more than k</strong> edge-disjoint
+         paths from s to t some of themwould have to share edges as they go through this cut, which is a contradiction.
+      <p><font size="4" color="red">Therefore, flow network can also be used to measure the connectivity of a network based on the multiplicity of alternative paths (edge-disjoint paths), which also reflects the
+         network's invulnerability to deletions of arcs (directed edges) or vertices.</font></p>
+    </div>
+  </body>
+</html>
