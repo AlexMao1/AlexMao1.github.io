@@ -87,6 +87,27 @@
          simple paths in a connected graph, and the most common approach we use is breadth-first search. The algorithm that uses breadth-first search to find augmenting
          paths is called <strong>the Edmonds-Karp algorithm</strong>. Detailed implementation of the algorithm and time complexity analysis can be found here:
          <a href="https://cp-algorithms.com/graph/edmonds_karp.html">The Edmonds-Karp Algorithm</a></p>
+      <h3>Push-Relabel Method</h3>
+      <p>Currently, the most time-efficient algorithms for finding maximum flow are using the push-relabel method rather than the Ford-Fulkerson method. A crucial difference
+         between these two approaches is that Ford-Fulkerson method examines the <strong>entire residual graph during each iteration</strong> while push-relabel method only processes
+         <strong>one vertex at a time</strong>. An obvious outcome is that push-relabel method costs O(V²E) but Ford-Fulkerson method costs O(VE²).</p>
+      <p>Before going any further, we need to clarify some notations for push-relabel algorithms: v.h represents the height of a vertex, v.e represents the excess flow stored in
+         a vertex. The height of all vertices (except for source and target) are initially 0 and the excess flow of all vertices are initially 0.</p>
+      <p>As the name implies, push-relabel method consists of two main operations:</p>
+      <ul>
+        <li><strong>Push Operation</strong></li>
+        <p>This operation only applies to vertex u if u is <strong>overflowing</strong>, meaning that Σ(v, u).f - Σ(u, v).f > 0.<br> By pushing, we send as much flow as we can from
+           u to one of its neighbors v where u.h = v.h + 1 and Δf(u, v) = min(u.e, C'(u, v)). <strong>Note: </strong>C'(u, v) is the residual capacity of edge (u, v).</p>
+        <img src="Push1.png" alt="">
+        <li><strong>Relabel Operation</strong></li>
+        <p>This operation only applies to vertex u if u is <strong>overflowing</strong> and all its neighbors V satifies <strong>u.h ≤ v.h for all v ∈ V</strong>.<br> By relabeling, we increase the
+           height of vertex u to <strong>1 + min(v.h for all v ∈ V)</strong>. Since we can only push excess flow from a vertex to its downhill neighbors, adjusting heights of vertices is necessary
+           to keep the algorithm progressing.</p>
+        <img src="Relabel1.png" alt=""><img src="Relabel2.png" alt=""><img src="Relabel3.png" alt=""><img src="Relabel4.png" alt="">
+        <img src="Relabel5.png" alt=""><img src="Relabel6.png" alt=""><img src="Relabel7.png" alt=""><img src="Relabel8.png" alt="">
+      </ul>
+      <p><font size="4" color="red">The generic push-relabel algorithm applies push or relabel operations to every vertex that satifies the condition until no excess flow can be sent from any
+         vertex, which means maximum flow has been reached.</font></p>
     </div>
     <div id="Applications">
       <h2>3. What can we use flow network for?</h2>
@@ -115,6 +136,9 @@
          Create extra source and sink vertices. <strong>Create edges from the source to each team with a capacity of Ti. Create edges from each table vertex to the sink vertex with capacity Si</strong>.
          Finally, add edges from each team to each table, with capacity 1, since each team can provide at most one person per table. Run the network flow algorithm.
          If the maximal flow equals the sum of the number of team members, the seating can be done. Otherwise, it can not be.</p>
+      <p><font size="4" color="red">Normally, bipartite matching problems will involve much more vertices than the example shown in previous sections and it is not space-efficient to demonstrate each step of how to find
+         the maximum flow in a bipartite matching problem here. If you're interested in a step-by-step solution, visit <a href="https://visualgo.net/en/matching">here</a> to see an interactive
+         bipartite matching demo.</font></p>
       <h3>Image Segmentation</h3>
       <p>Bipartite matching is a very direct use of flow network as the process of constructing a network is fairly simple. Another more practical use of flow network is called
          <strong>Image Segmentation</strong>.</p>
@@ -159,6 +183,10 @@
          Since we have restricted the capacity to be 1, the capacity of a cut is equal to the number of edges, k, in the cut. For a flow to have maximal value it must be that each of
          the edges in the cut is assigned value 1, which means that <strong>this flow is going through all k edges in the cut</strong>. If there were <strong>more than k</strong> edge-disjoint
          paths from s to t some of themwould have to share edges as they go through this cut, which is a contradiction.
+      <p><strong>Another Perspective:</strong> Interestingly, edge-disjoint paths are similar to augmenting paths in Ford-Fulkerson method and the number of edges we can cut resembles a graph cut which passes through several edges.
+         If you recall, during each iteration of Ford-Fulkerson method, we will either saturate an edge (increase its flow to its capacity) or clear an edge (decrease its flow to zero). While
+         saturating an edge (removing it from the residual graph), we are also removing its future possibility of being chosen by any augmenting path no matter what search technique we use.
+         Thus, the number of edges we can cut is guaranteed to be equal to the number of augmenting paths we can find in a flow network.</p>
       <p><font size="4" color="red">Therefore, flow network can also be used to measure the connectivity of a network based on the multiplicity of alternative paths (edge-disjoint paths), which also reflects the
          network's invulnerability to deletions of arcs (directed edges) or vertices.</font></p>
     </div>
