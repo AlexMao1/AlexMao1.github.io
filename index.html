@@ -124,37 +124,39 @@
       <p><font size="3" color="red">Hence, there is no simple path from Source to Target in the residual graph. By the max-flow min-cut theorem we've shown in Ford-Fulkerson method, the
          flow we obtain is the maximum flow.</font></p>
       <h4>Time Complexity Analysis</h4>
-      <p><font size="3" color="red">First, we need to prove that if there is an overflowing vertex x, there must exist a simple path from x to Source in the residual graph.</font></p>
-      <p>For an overflowing vertex x, let U = {v: there exists a simple path from x to v in the residual graph} and suppose S ∉ U. Let T = V - U. Now we sum over all vertices in U to obtain</p>
-      <img src="Proof1.PNG" alt="">
-      <p>We know that the quantity Σe(u) must be positive because e(x) > 0, x ∈ U, all vertices other than S have nonnegative excess and S ∉ U. Thus, we have</p>
-      <img src="Proof2.PNG" alt="">
-      <p>In order for this inequality to hold, we must have <img src="Proof3.PNG" alt="">. So there must exist at least one pair of vertices u' ∈ U and v' ∈ T with f(v', u') > 0. But if
+      <ul>
+        <li><font size="3" color="red">First, we need to prove that if there is an overflowing vertex x, there must exist a simple path from x to Source in the residual graph.</font></li>
+        <p>For an overflowing vertex x, let U = {v: there exists a simple path from x to v in the residual graph} and suppose S ∉ U. Let T = V - U. Now we sum over all vertices in U to obtain</p>
+        <img src="Proof1.PNG" alt="">
+        <p>We know that the quantity Σe(u) must be positive because e(x) > 0, x ∈ U, all vertices other than S have nonnegative excess and S ∉ U. Thus, we have</p>
+        <img src="Proof2.PNG" alt="">
+        <p>In order for this inequality to hold, we must have <img src="Proof3.PNG" alt="">. So there must exist at least one pair of vertices u' ∈ U and v' ∈ T with f(v', u') > 0. But if
          f(v', u') > 0, there must be a residual edge (u', v'), which means there exists a simple path from x to v', contradicting the assumption that S ∉ U.</p>
-      <p><font size="3" color="red">Second, we need to prove that the height of all vertices is at most 2|V| - 1.</font></p>
-      <p>The heights of Source and Target never change because they are not overflowing by definition. The height of Source is always |V| and the height of Target is always 0.<br>
-         Now consider any vertex u ∈ V - {S, T}, initially u.h = 0 ≤ 2|V| - 1. When u is relabled, it must be overflowing, meaning that there is a simple path P from u to S in the residual graph.
-         Let P = (V0, V1, . . . , Vk), where V0 = u, Vk = S, and K ≤ |V| - 1. For i = 0, 1, . . . , k - 1, we have (Vi, Vi+1) ∈ E, and therefore, Vi.h ≤ Vi+1.h + 1. Expanding these inequalities
-         over path P yields u.h = V0.h ≤ Vk.h + k ≤ S.h + |V| - 1 = 2|V| - 1.</p>
-      <p><font size="3" color="red">Third, we need to prove that the number of relabel operations during the execution of a push-relabel algorithm is at most (2|V| - 1)(|V| - 2) < 2|V|².</font></p>
-      <p>Only the |V| - 2 vertices in V - {S, T} can be relabeled. Since the height of all vertices is at most 2|V| - 1, each u ∈ V - {S, T} can be relabeled at most 2|V| - 1 times. Thus the
-         total number of relabel operations is at most (2|V| - 1)(|V| - 2).</p>
-      <p><font size="3" color="red">Fourth, we need to prove that the number of saturating pushes during the execution of a push-relabel algorithm is at most 2|V||E|.</font></p>
-      <p>For any pair of vertices (u, v) ∈ V, we will count the saturating pushes from u to v and from v to u together, calling them the saturating pushes between u and v. Suppose a saturating
-         push from u to v has occured, it means u.h = v.h + 1 at that time. In order for another push from v to u occur, v.h must increase by 2 since height never decreases. Recall that the
-         upper bound of height is 2|V| - 1, so the number of times any vertex can have its height increase by 2 is less than |V|. Since both u and v can increase their height to 2|V| - 1, the
-         total number of times their height increases is less than 2|V|. Multiplying by the number edges yields an upper bound of 2|V||E| saturating pushes.</p>
-      <p><font size="3" color="red">Finally, we need to prove that the number of nonsaturating pushes during the executiono of a push-relabel algorithm is less than 4|V|²(|V| + |E|).</font></p>
-      <p>Define a potential function <img src="Proof4.PNG" alt="">. Let's examine the two ways in which Φ may increase. First, relabeling a vertex u increases Φ by less than 2|V| since the
-         relabeling cannot increase u's height by more than its maximum height, which is at most 2|V| - 1. Second, a saturating push from u to v increases Φ by less than 2|V| since u's height
-         doesn't change and v's height cannot excede 2|V| - 1.</p>
-      <p>Now we show that a nonsaturating push from u to v decreases Φ by at least 1. Before the nonsaturating push, u is overflowing and v may or may not be overflowing. u is no longer
-         overflowing after the push. Therefore, the potential function Φ has decreased by exactly u.h and has increased by either 0 or v.h. Since u.h = v.h + 1, the net effect is that Φ has
-         decreased by at least 1.</p>
-      <p>Thus, during the course of the algorithm, the total amount of increase in Φ is due to relabeling and saturating pushes. Previous results constrain the increase to be less than
-         (2|V|)(2|V|²) + (2|V|)(2|V||E|) = 4|V|²(|V| + |E|).</p>
-      <p><strong>In conclusion, the algorithm terminates after <font color="red">O(|V|²|E|)</font> operations. We're not giving specific implementation of push-relabel method here but
-         there is a way to achieve O(|V|) per relabel and O(1) per push, meaning that the total time complexity of the algorithm is <font color="red">O(|V|²|E|)</font>.</strong></p>
+        <li><font size="3" color="red">Second, we need to prove that the height of all vertices is at most 2|V| - 1.</font></li>
+        <p>The heights of Source and Target never change because they are not overflowing by definition. The height of Source is always |V| and the height of Target is always 0.<br>
+           Now consider any vertex u ∈ V - {S, T}, initially u.h = 0 ≤ 2|V| - 1. When u is relabled, it must be overflowing, meaning that there is a simple path P from u to S in the residual graph.
+           Let P = (V0, V1, . . . , Vk), where V0 = u, Vk = S, and K ≤ |V| - 1. For i = 0, 1, . . . , k - 1, we have (Vi, Vi+1) ∈ E, and therefore, Vi.h ≤ Vi+1.h + 1. Expanding these inequalities
+           over path P yields u.h = V0.h ≤ Vk.h + k ≤ S.h + |V| - 1 = 2|V| - 1.</p>
+        <li><font size="3" color="red">Third, we need to prove that the number of relabel operations during the execution of a push-relabel algorithm is at most (2|V| - 1)(|V| - 2) < 2|V|².</font></li>
+        <p>Only the |V| - 2 vertices in V - {S, T} can be relabeled. Since the height of all vertices is at most 2|V| - 1, each u ∈ V - {S, T} can be relabeled at most 2|V| - 1 times. Thus the
+           total number of relabel operations is at most (2|V| - 1)(|V| - 2).</p>
+        <li><font size="3" color="red">Fourth, we need to prove that the number of saturating pushes during the execution of a push-relabel algorithm is at most 2|V||E|.</font></li>
+        <p>For any pair of vertices (u, v) ∈ V, we will count the saturating pushes from u to v and from v to u together, calling them the saturating pushes between u and v. Suppose a saturating
+           push from u to v has occured, it means u.h = v.h + 1 at that time. In order for another push from v to u occur, v.h must increase by 2 since height never decreases. Recall that the
+           upper bound of height is 2|V| - 1, so the number of times any vertex can have its height increase by 2 is less than |V|. Since both u and v can increase their height to 2|V| - 1, the
+           total number of times their height increases is less than 2|V|. Multiplying by the number edges yields an upper bound of 2|V||E| saturating pushes.</p>
+        <li><font size="3" color="red">Finally, we need to prove that the number of nonsaturating pushes during the executiono of a push-relabel algorithm is less than 4|V|²(|V| + |E|).</font></li>
+        <p>Define a potential function <img src="Proof4.PNG" alt="">. Let's examine the two ways in which Φ may increase. First, relabeling a vertex u increases Φ by less than 2|V| since the
+           relabeling cannot increase u's height by more than its maximum height, which is at most 2|V| - 1. Second, a saturating push from u to v increases Φ by less than 2|V| since u's height
+           doesn't change and v's height cannot excede 2|V| - 1.</p>
+        <p>Now we show that a nonsaturating push from u to v decreases Φ by at least 1. Before the nonsaturating push, u is overflowing and v may or may not be overflowing. u is no longer
+           overflowing after the push. Therefore, the potential function Φ has decreased by exactly u.h and has increased by either 0 or v.h. Since u.h = v.h + 1, the net effect is that Φ has
+           decreased by at least 1.</p>
+        <p>Thus, during the course of the algorithm, the total amount of increase in Φ is due to relabeling and saturating pushes. Previous results constrain the increase to be less than
+           (2|V|)(2|V|²) + (2|V|)(2|V||E|) = 4|V|²(|V| + |E|).</p>
+        <p><strong>In conclusion, the algorithm terminates after <font color="red">O(|V|²|E|)</font> operations. We're not giving specific implementation of push-relabel method here but
+           there is a way to achieve O(|V|) per relabel and O(1) per push, meaning that the total time complexity of the algorithm is <font color="red">O(|V|²|E|)</font>.</strong></p>
+      </ul>
     </div>
     <div id="Applications">
       <h2>3. What can we use flow network for?</h2>
