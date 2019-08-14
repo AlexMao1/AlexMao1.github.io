@@ -93,31 +93,44 @@
          <strong>one vertex at a time</strong>. An obvious outcome is that push-relabel method costs O(V²E) but Ford-Fulkerson method costs O(VE²).</p>
       <p>Before going any further, we need to introduce two core concepts of push-relabel algorithm: <strong>Excess</strong> and <strong>Height</strong>. Imagine every intermediate vertex
          (all vertices except for Source and Target) as a storage point that can temporarily store certain amount of flow when the algorithm progresses. What we're trying to do is essentially
-         to pure as much flow as we can from upper level (vertices with <strong>larger heights</strong>) to lower level (vertices with <strong>smaller heights</strong>), just like cascades.</p>
-      <p>To clarify some notations for push-relabel algorithms: <strong>v.h</strong> represents the height of a vertex, <strong>v.e</strong> represents the excess flow stored in
-         a vertex. The height of all vertices (except for Source) are initially 0 and the excess flow of all vertices are initially 0. The height of source is equal to the number of vertices |V|.</p>
+         to pure as much flow as we can from upper level (vertices with <strong>larger heights</strong>) to lower level (vertices with <strong>smaller heights</strong>), just like cascades.
+         We define a <strong>height function h: h(Source) = |V|, h(t) = 0, h(u) ≤ h(v) + 1 for every residual edge (u, v) ∈ E.</strong></p>
+      <p>To clarify some notations for push-relabel algorithm: <strong>v.h</strong> represents the height of a vertex, <strong>v.e</strong> represents the excess flow stored in
+         a vertex. The height of all vertices (except for Source) are initially 0 and the excess flow of all vertices are initially 0. The height of Source is equal to the number of vertices |V|.
+         The height of Target is always zero.</p>
       <p>As the name implies, push-relabel method consists of two main operations:</p>
       <ul>
         <li><strong>Push Operation</strong></li>
         <p>This operation only applies to vertex u if u is <strong>overflowing</strong>, meaning that u.e > 0.<br> By pushing, we send as much flow as we can from
-           u to one of its neighbors v where u.h = v.h + 1 and Δf(u, v) = min(u.e, C'(u, v)).</p>
-        <p><strong>Note: </strong>C'(u, v) is the residual capacity of edge (u, v).</p>
+           u to one of its neighbors v where u.h = v.h + 1 and Δf(u, v) = min(u.e, C'(u, v)).<br>
+           A <strong>saturating push</strong> means f(u, v) = C'(u, v) after the push.<br>
+           A <strong>nonsaturating push</strong> means f(u, v) < C'(u, v) after the push.</p>
+        <p><strong>Note: </strong>C'(u, v) is the residual capacity of edge (u, v). The constraint u.h = v.h + 1 <strong>doesn't</strong> apply if u is the Source.</p>
         <img src="Push1.PNG" alt="">
-        <p>In the example above, we are pushing the maximum amount of flow we can (flow value is equal to capacity) to two neighbors of Source. After this push, V1 and V2 each gets certain amount
-           of flow temporarily stored, denoted as <strong>e: 16</strong> and <strong>e: 13</strong>. We can see that all neighbors of V1 and V2 have a height of 0, which is the same as V1 and V2.<br>
+        <p>In the example above, we are pushing the maximum amount of flow we can (flow value is equal to capacity) to two neighbors of Source, which is the first step of push-relabel algorithm.
+           After this push, V1 and V2 each gets certain amount of temporary flow, denoted as <strong>e: 16</strong> and <strong>e: 13</strong>. We can see that all neighbors of V1 and V2
+           have a height of 0, which is the same as V1 and V2.<br>
            So we <strong>cannot</strong> push any flow out of V1 and V2 if we don't adjust their heights, which is called the <strong>Relabel Operation</strong>.</p>
         <li><strong>Relabel Operation</strong></li>
-        <p>This operation only applies to vertex u if u is <strong>overflowing</strong> and all its neighbors V satifies <strong>u.h ≤ v.h for all v ∈ V</strong>.<br> By relabeling, we increase the
-           height of vertex u to <strong>1 + min(v.h for all v ∈ V)</strong>. Since we can only push excess flow from a vertex to its downhill neighbors, adjusting heights of vertices is necessary
+        <p>This operation only applies to vertex u if u is <strong>overflowing</strong> and all its neighbors N(u) satifies <strong>u.h ≤ v.h for all v ∈ N(u)</strong>.<br> By relabeling, we increase the
+           height of vertex u to <strong>1 + min(v.h for all v ∈ N(u))</strong>. Since we can only push excess flow from a vertex to its downhill neighbors, adjusting heights of vertices is necessary
            to keep the algorithm progressing.</p>
         <img src="Relabel1.PNG" alt=""><img src="Relabel2.PNG" alt=""><img src="Relabel3.PNG" alt=""><img src="Relabel4.PNG" alt="">
         <img src="Relabel5.PNG" alt=""><img src="Relabel6.PNG" alt=""><img src="Relabel7.PNG" alt=""><img src="Relabel8.PNG" alt="">
         <img src="Relabel9.PNG" alt="">
       </ul>
-      <p><font size="4" color="red">In the example above, all intermediate vertices have zero excess flow and the push-relabel algorithm terminates.</font></p>
+      <p><font size="4" color="red">In the example above, there is no applicable push or relabel operations and thus the algorithm terminates.</font></p>
       <h4>Proof of Correctness</h4>
-      <p>It is really simple to prove that the flow f we obtain from push-relabel method is indeed the maximum flow: we just need to prove there is no path from S to T in the residual network
-         after the algorithm terminates.</p>
+      <p>Before proving the whole algorithm is correct, we need to prove that <strong>the height function h we define still maintains the height attribute</strong> after all the relabel operations.</p>
+      <p>The proof is by induction on the two kinds of basic operations performed. Initially, h is a height function as defined.</p>
+      <p>We claim that if h is a height function, then <strong>a relabel operation leaves h a height function</strong>. If we look at a residual edge (u, v) ∈ E that leaves u, then a relabel
+         operation ensures u.h ≤ v.h + 1 afterward. If we look at a residual edge (w, u) ∈ E that enters u, since a relabel operation increases the height of u by at least 1, w.h ≤ u.h + 1 before
+         the relabel operation implies that w.h < u.h + 1 afterward.</p>
+      <p>Now we claim that if h is a height function, then <strong>a push operation leaves h a height function</strong>.</p>
+      <p>A push operation may add an edge (v, u) to the residual graph. In this case, we have v.h = u.h - 1 < u.h + 1 because we are pushing flow from u to v. A push operation may also remove edge
+         (u, v) from the residual graph. In this case, removing an edge also removes the corresponding constraints, and h remains a height function.</p>
+      <p>After proving the stability of height function, it is really simple to prove that the flow f we obtain from push-relabel method is indeed the maximum flow: we just need to prove there is
+         no path from S to T in the residual network after the algorithm terminates.</p>
       <p><font size="3" color="red">Let's first suppose that there exists a simple path P from S to T in the residual network for contradiction purposes, where P = (V0, V1, . . . , Vk).</font></p>
       <p>For i = 0, 1, 2, . . . , k - 1, edge(Vi, Vi+1) ∈ E. By the definition of height function h, h(Vi) ≤ h(Vi+1) + 1. Combining these two inequalities over path P yields h(s) ≤ h(t) + k.
          Since P is a simple path, k < |V|. So we can get h(s) ≤ 0 + k < |V|, which <strong>contradicts</strong> the requirement that h(s) = |V|.</p>
